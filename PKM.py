@@ -3,6 +3,9 @@ import os
 from datetime import date
 import sqlite3
 from tabulate import tabulate
+from rich.console import Console
+from rich.markdown import Markdown
+
 
 class note:
     def __init__(self,title,author,date,tag,content):
@@ -20,7 +23,7 @@ def add_note(notebook_name):
     title=input("Title: ").strip().capitalize()
     author=input("Author: ").strip()
     date=input("Date: ").strip()
-    tags=input("Tag:")
+    tags=input("Tag(multiple tags require space in between):").strip()
     content=input("Content: ")
     new_note=note(title,author,date,tags.split(" "),content)
     file_path=f"Notebooks/{notebook_name}/{title}.md"
@@ -28,7 +31,7 @@ def add_note(notebook_name):
         fopen_note.write(f"# Title: {new_note.title}\n")
         fopen_note.write(f"## Author: {new_note.author}\n")
         fopen_note.write(f"### Date: {new_note.date}\n")
-        fopen_note.write(f"### Tag: {",".join(new_note.tag)}\n")
+        fopen_note.write(f"### Tag: {", ".join(new_note.tag)}\n")
         fopen_note.write(f"*{new_note.content}*")
     insert_into_database(new_note.title,new_note.author,new_note.date,new_note.tag,notebook_name)
 
@@ -59,19 +62,43 @@ def view_note(notebook_name):
         _no_ , _title_,*_info_,_notebook_ = ele
         if _no_ == ask_code_no:
             with open(f"Notebooks/{_notebook_}/{_title_}.md" ,"r") as fread:
-                print(fread.read())
-            break
+                content=fread.read()
+    
+    console=Console()
+    formatted_content =Markdown(content)
+    console.print(formatted_content)
             
+
     
 
 
-def filter_note():
-    pass
+def filter_note(notebook_name):
+    filtered_notes=[]
+    ask_filter_tag=input("Enter filter tag(Multiple tags require space in between): ").strip().split(" ")
+    header=['Code','Title','Author','Date','Tags','Notebook']
+    with sqlite3.connect("Database/main_database.db") as connection:
+        cursor=connection.cursor()
+        list_notes=f'''
+        SELECT * from {notebook_name};
+        '''
+        cursor.execute(list_notes)
+        output=cursor.fetchall()
+    for ele in output:
+        *_info_,_tags_,_notebook_ = ele
+        for t in ask_filter_tag:
+            if t in _tags_.split(","):
+                filtered_notes.append(ele)
+    print("Filtered data:\n")
+    print(tabulate(filtered_notes,headers=header,tablefmt="grid"))
+
+
+
 
 def search_by_keyword():
     pass
 
 
+#inserting into database
 def insert_into_database(Title,Author,Date,Tags,Notebook_name):
     print("Pushing data into database...")
     with sqlite3.connect("Database/main_database.db") as connection:
@@ -88,8 +115,8 @@ def insert_into_database(Title,Author,Date,Tags,Notebook_name):
         '''
         cursor.execute(create_table)
         connection.commit()
-        insert_query='''
-        INSERT INTO Notes(Title,Author,Date,Tags,Notebook)
+        insert_query=f'''
+        INSERT INTO {Notebook_name}(Title,Author,Date,Tags,Notebook)
         VALUES (?, ?, ?, ?, ?);
         '''
         data=(Title,Author,Date,",".join(Tags),Notebook_name)
@@ -97,6 +124,8 @@ def insert_into_database(Title,Author,Date,Tags,Notebook_name):
         connection.commit()
     print("Data uploaded....")
 
+
+#notebook class
 class notebook:
     def __init__(self,name,date):
         self.name=name
@@ -104,19 +133,18 @@ class notebook:
     def __call__(self):
         return self.name
     def addnote(self):
-        # add_note(self.name)
-        pass
+        add_note(self.name)
     def listnote(self):
-        list_note()
+        list_note(self.name)
     def viewnote(self):
-        view_note()
+        view_note(self.name)
     def filternotes(self):
-        pass
+        filter_note(self.name)
     def searchbykeywords(self):
         pass
 
 
-
+#main function
 def ask_user():
     main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.Filter by tags\nEnter your option: ")
     if main_prompt.strip() == "1":
@@ -141,16 +169,13 @@ def ask_user():
                 # ask_notebook_name.addnote()
             elif ask_about_notebook == "2":
                 list_note(ask_notebook_name) #List notes
-
             elif ask_about_notebook =="3":
-
                 view_note(ask_notebook_name) #view notes
             elif ask_about_notebook == "4":
                 pass #search by keywords
             elif ask_about_notebook =="5":
+                filter_note(ask_notebook_name)
                 pass #Filter by tags
-        
-            
         else:
             print("It doesnt exist.")
 
