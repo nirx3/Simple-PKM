@@ -48,7 +48,7 @@ def view_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
-        SELECT * from Notes WHERE Notebook='{notebook_name}';
+        SELECT * from {notebook_name};
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
@@ -76,8 +76,8 @@ def insert_into_database(Title,Author,Date,Tags,Notebook_name):
     print("Pushing data into database...")
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
-        create_table='''
-        CREATE TABLE IF NOT EXISTS Notes(
+        create_table=f'''
+        CREATE TABLE IF NOT EXISTS {Notebook_name}(
             Code INTEGER  PRIMARY KEY AUTOINCREMENT,
             Title TEXT,
             Author TEXT,
