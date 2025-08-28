@@ -77,10 +77,14 @@ class notebook:
         list_note()
     def viewnote(self):
         view_note()
-
+    def filternotes(self):
+        pass
+    def searchbykeywords(self):
+        pass
+    
 def ask_user():
-    os.getcwd()
-    main_prompt=input("1.Add notebook\n2.Open existing notebook\nEnter your option: ")
+    # os.getcwd()
+    main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.Filter by tags\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
         new_notebook=notebook(notebook_name,date.today())
@@ -93,16 +97,30 @@ def ask_user():
         except Exception as e:
             print(f"An error occured:{e}")
 
-    else:
+    elif main_prompt.strip() == "2":
         ask_notebook_name=input("Enter Notebook:").strip().capitalize()
         if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
             print(f" 📓 Notebook:{ask_notebook_name}")
-            ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\nEnter your choice: ")
-            if ask_about_notebook.strip() == "1":
+            ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\nEnter your choice: ").strip()
+            if ask_about_notebook == "1":
                 add_note(ask_notebook_name)
+            elif ask_about_notebook == "2":
+                pass #List notes
+            elif ask_about_notebook =="3":
+                pass #view notes
+            elif ask_about_notebook == "4":
+                pass #search by keywords
+            elif ask_about_notebook =="5":
+                pass #Filter by tags
+        
             
         else:
-            print("It doesnt exist")
+            print("It doesnt exist.")
+
+    elif main_prompt.strip() == "3":
+        ask_tag_filter=input("Enter tag:").strip()
+        print(ask_tag_filter)
+        pass
 
         
 
