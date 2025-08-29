@@ -33,7 +33,7 @@ def add_note(notebook_name):
         fopen_note.write(f"### Date: {new_note.date}\n")
         fopen_note.write(f"### Tag: {", ".join(new_note.tag)}\n")
         fopen_note.write(f"*{new_note.content}*")
-    insert_into_database(new_note.title,new_note.author,new_note.date,new_note.tag,notebook_name)
+    insert_into_database(new_note.title,new_note.author,new_note.date,new_note.tag,new_note.content,notebook_name)
 
 def list_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
@@ -43,11 +43,11 @@ def list_note(notebook_name):
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
-        print(tabulate(output,headers=['Code','Title','Author','Date','Tags','Notebook'],tablefmt="grid"))
+        print(tabulate(output,headers=['Code','Title','Author','Date','Tags','Content','Notebook'],tablefmt="grid"))
 
 
 def view_note(notebook_name):
-    header=['Code','Title','Author','Date','Tags','Notebook']
+    header=['Code','Title','Author','Date','Tags','Content','Notebook']
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
@@ -75,7 +75,7 @@ def view_note(notebook_name):
 def filter_note(notebook_name):
     filtered_notes=[]
     ask_filter_tag=input("Enter filter tag(Multiple tags require space in between): ").strip().split(" ")
-    header=['Code','Title','Author','Date','Tags','Notebook']
+    header=['Code','Title','Author','Date','Tags','Content','Notebook']
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
@@ -84,7 +84,7 @@ def filter_note(notebook_name):
         cursor.execute(list_notes)
         output=cursor.fetchall()
     for ele in output:
-        *_info_,_tags_,_notebook_ = ele
+        *_info_,_tags_,_content_,_notebook_ = ele
         for t in ask_filter_tag:
             if t in _tags_.split(","):
                 filtered_notes.append(ele)
@@ -99,7 +99,7 @@ def search_by_keyword():
 
 
 #inserting into database
-def insert_into_database(Title,Author,Date,Tags,Notebook_name):
+def insert_into_database(Title,Author,Date,Tags,Content,Notebook_name):
     print("Pushing data into database...")
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
@@ -110,14 +110,15 @@ def insert_into_database(Title,Author,Date,Tags,Notebook_name):
             Author TEXT,
             Date TEXT,
             Tags TEXT,
+            Content TEXT,
             Notebook TEXT
         );
         '''
         cursor.execute(create_table)
         connection.commit()
         insert_query=f'''
-        INSERT INTO {Notebook_name}(Title,Author,Date,Tags,Notebook)
-        VALUES (?, ?, ?, ?, ?);
+        INSERT INTO {Notebook_name}(Title,Author,Date,Tags,Content,Notebook)
+        VALUES (?, ?, ?, ?, ?, ?);
         '''
         data=(Title,Author,Date,",".join(Tags),Notebook_name)
         cursor.execute(insert_query, data)
@@ -146,16 +147,34 @@ class notebook:
 
 #main function
 def ask_user():
+    binding={}
     main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.Filter by tags\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
         new_notebook=notebook(notebook_name,date.today())
         notebook_path=os.path.join("Notebooks",new_notebook.name)
         try:
-            print("Creating notebook...")
-            os.makedirs(notebook_path, exist_ok=True)
-            print("Successfully created!")
-
+            if not os.path.isdir(notebook_path):
+                print("Creating notebook...")
+                os.makedirs(notebook_path, exist_ok=True)
+                print("Successfully created!")
+                with sqlite3.connect("Database/main_database.db") as connection:
+                    cursor=connection.cursor()
+                    create_table=f'''
+                    CREATE TABLE IF NOT EXISTS {notebook_name}(
+                        Code INTEGER  PRIMARY KEY AUTOINCREMENT,
+                        Title TEXT,
+                        Author TEXT,
+                        Date TEXT,
+                        Tags TEXT,
+                        Content TEXT,
+                        Notebook TEXT
+                    );
+                    '''
+                    cursor.execute(create_table)
+                    connection.commit()
+            else:
+                print(f"Notebook with name '{notebook_name}' already exists!")
         except Exception as e:
             print(f"An error occured:{e}")
 
@@ -184,6 +203,6 @@ def ask_user():
         print(ask_tag_filter)
         pass
 
-        
+    # print(binding)
 
 ask_user()
