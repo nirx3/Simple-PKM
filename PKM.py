@@ -86,7 +86,7 @@ def filter_note(notebook_name):
     for ele in output:
         *_info_,_tags_,_content_,_notebook_ = ele
         for t in ask_filter_tag:
-            if t in _tags_.split(","):
+            if t.capitalize() in _tags_.split(",") or t.lower() in _tags_.split(","):
                 filtered_notes.append(ele)
     print("Filtered data:\n")
     print(tabulate(filtered_notes,headers=header,tablefmt="grid"))
@@ -120,7 +120,7 @@ def insert_into_database(Title,Author,Date,Tags,Content,Notebook_name):
         INSERT INTO {Notebook_name}(Title,Author,Date,Tags,Content,Notebook)
         VALUES (?, ?, ?, ?, ?, ?);
         '''
-        data=(Title,Author,Date,",".join(Tags),Notebook_name)
+        data=(Title,Author,Date,",".join(Tags),Content,Notebook_name)
         cursor.execute(insert_query, data)
         connection.commit()
     print("Data uploaded....")
