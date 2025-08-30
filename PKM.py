@@ -6,7 +6,6 @@ from tabulate import tabulate
 from rich.console import Console
 from rich.markdown import Markdown
 
-
 class note:
     def __init__(self,title,author,date,tag,content):
         self.title=title
@@ -39,7 +38,7 @@ def list_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
-        SELECT * from Notes WHERE Notebook='{notebook_name}';
+        SELECT * FROM {notebook_name};
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
@@ -51,7 +50,7 @@ def view_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
-        SELECT * from {notebook_name};
+        SELECT * FROM {notebook_name};
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
@@ -79,7 +78,7 @@ def filter_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         list_notes=f'''
-        SELECT * from {notebook_name};
+        SELECT * FROM {notebook_name};
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
@@ -94,8 +93,25 @@ def filter_note(notebook_name):
 
 
 
-def search_by_keyword():
-    pass
+def search_by_keyword(notebook_name):
+    header= ['Code','Title','Author','Date','Tags','Content','Notebook']
+    searched_data=[]
+    ask_keyword=input("Enter keyword(multiple keywords require space in between): ").strip()
+    with sqlite3.connect("Database/main_database.db") as connection:
+        cursor = connection.cursor()
+        search_keywords=f'''
+        SELECT * FROM {notebook_name};
+        '''
+        cursor.execute(search_keywords)
+        output=cursor.fetchall()
+    for ele in output:
+        _code_,*_info_= ele
+        for keyword in ask_keyword.split(" "):
+            if any(keyword.lower() in str(x) for x in _info_ ) or any(keyword.upper() in str(x) for x in _info_ ) or any(keyword.capitalize() in str(x) for x in _info_ ):
+                searched_data.append(ele)
+    print(tabulate(searched_data,headers=header,tablefmt="grid"))
+
+        
 
 
 #inserting into database
@@ -142,13 +158,13 @@ class notebook:
     def filternotes(self):
         filter_note(self.name)
     def searchbykeywords(self):
-        pass
+        search_by_keyword(self.name)
 
 
 #main function
 def ask_user():
     binding={}
-    main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.Filter by tags\nEnter your option: ")
+    main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
         new_notebook=notebook(notebook_name,date.today())
@@ -191,6 +207,7 @@ def ask_user():
             elif ask_about_notebook =="3":
                 view_note(ask_notebook_name) #view notes
             elif ask_about_notebook == "4":
+                search_by_keyword(ask_notebook_name)
                 pass #search by keywords
             elif ask_about_notebook =="5":
                 filter_note(ask_notebook_name)
@@ -199,8 +216,6 @@ def ask_user():
             print("It doesnt exist.")
 
     elif main_prompt.strip() == "3":
-        ask_tag_filter=input("Enter tag:").strip()
-        print(ask_tag_filter)
         pass
 
     # print(binding)
