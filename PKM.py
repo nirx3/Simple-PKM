@@ -1,10 +1,12 @@
 
 import os
+import shelve
 from datetime import date
 import sqlite3
 from tabulate import tabulate
 from rich.console import Console
 from rich.markdown import Markdown
+
 
 class note:
     def __init__(self,title,author,date,tag,content):
@@ -48,10 +50,7 @@ def note_manipulation(notebook_name):
         delete_note(notebook_name)
 
 
-
-
-
-
+#add note
 def add_note(notebook_name):
     title=input("Title: ").strip().capitalize()
     author=input("Author: ").strip()
@@ -197,7 +196,6 @@ class notebook:
 
 #main function
 def ask_user():
-    # binding={}
     main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
@@ -208,23 +206,29 @@ def ask_user():
                 print("Creating notebook...")
                 os.makedirs(notebook_path, exist_ok=True)
                 print("Successfully created!")
-                with sqlite3.connect("Database/main_database.db") as connection:
-                    cursor=connection.cursor()
-                    create_table=f'''
-                    CREATE TABLE IF NOT EXISTS {notebook_name}(
-                        Code INTEGER  PRIMARY KEY AUTOINCREMENT,
-                        Title TEXT,
-                        Author TEXT,
-                        Date TEXT,
-                        Tags TEXT,
-                        Content TEXT,
-                        Notebook TEXT
-                    );
-                    '''
-                    cursor.execute(create_table)
-                    connection.commit()
             else:
                 print(f"Notebook with name '{notebook_name}' already exists!")
+            if  not os.path.isdir("Database") :
+                    os.mkdir("Database")
+            with sqlite3.connect("Database/main_database.db") as connection:
+                cursor=connection.cursor()
+                create_table=f'''
+                CREATE TABLE IF NOT EXISTS {notebook_name}(
+                    Code INTEGER  PRIMARY KEY AUTOINCREMENT,
+                    Title TEXT,
+                    Author TEXT,
+                    Date TEXT,
+                    Tags TEXT,
+                    Content TEXT,
+                    Notebook TEXT
+                );
+                '''
+                cursor.execute(create_table)
+                connection.commit()
+            if not os.path.isdir("Object_database"):
+                os.mkdir("Object_database")
+            with shelve.open("Object_database/notebook_object.db") as notebook_db:
+                notebook_db[f"{notebook_name}"]=new_notebook
         except Exception as e:
             print(f"An error occured:{e}")
 
@@ -233,19 +237,18 @@ def ask_user():
         if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
             print(f" 📓 Notebook:{ask_notebook_name}")
             ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\n[6] Note Manipulation\nEnter your choice: ").strip()
+            with shelve.open("notebook.db") as object_retrieve:
+                target=object_retrieve[f"{ask_notebook_name}"]
             if ask_about_notebook == "1":
-                add_note(ask_notebook_name)
-                # ask_notebook_name.addnote()
+                target.addnote()
             elif ask_about_notebook == "2":
-                list_note(ask_notebook_name) #List notes
+                target.listnote()
             elif ask_about_notebook =="3":
-                view_note(ask_notebook_name) #view notes
+                target.viewnote()
             elif ask_about_notebook == "4":
-                search_by_keyword(ask_notebook_name)
-                pass #search by keywords
+                target.searchbykeywords()
             elif ask_about_notebook =="5":
-                filter_note(ask_notebook_name)
-                pass #Filter by tags
+                target.filternotes()
             else:
                 note_manipulation(ask_notebook_name)
         else:
@@ -254,6 +257,5 @@ def ask_user():
     elif main_prompt.strip() == "3":
         pass
 
-    # print(binding)
 
 ask_user()
