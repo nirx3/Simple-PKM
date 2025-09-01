@@ -18,6 +18,40 @@ class note:
     def deletenote(self):
         print("comming soon")
 
+def edit_note():
+    print("coming soon..")
+
+
+
+def delete_note(notebook):
+    ask_to_delete=input("Enter ID of the note which you wish to delete: ").strip().capitalize()
+    with sqlite3.connect("Database/main_database.db") as connection:
+        cursor=connection.cursor()
+        delete_script =f'''
+        DELETE FROM {notebook} WHERE Title = '{ask_to_delete}';
+
+        '''
+        cursor.execute(delete_script)
+        connection.commit()
+    filepath=f"Notebooks/{notebook}/{ask_to_delete}.md"
+    if os.path.exists(filepath):
+        os.remove(filepath)
+    print("Note with code {} has been deleted".format(ask_to_delete))
+
+
+
+def note_manipulation(notebook_name):
+    manipulation_mode=int(input("[1] Edit/Update note\n[2] Delete note\n Enter your choice: "))
+    if manipulation_mode == 1:
+        edit_note()
+    elif manipulation_mode == 2:
+        delete_note(notebook_name)
+
+
+
+
+
+
 def add_note(notebook_name):
     title=input("Title: ").strip().capitalize()
     author=input("Author: ").strip()
@@ -42,7 +76,7 @@ def list_note(notebook_name):
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
-        print(tabulate(output,headers=['Code','Title','Author','Date','Tags','Content','Notebook'],tablefmt="grid"))
+    print(tabulate(output,headers=['Code','Title','Author','Date','Tags','Content','Notebook'],tablefmt="grid"))
 
 
 def view_note(notebook_name):
@@ -54,7 +88,7 @@ def view_note(notebook_name):
         '''
         cursor.execute(list_notes)
         output=cursor.fetchall()
-        print(tabulate(output,headers=header,tablefmt="grid"))
+    print(tabulate(output,headers=header,tablefmt="grid"))
         
     ask_code_no=int(input("Enter code to view: "))
     for ele in output:
@@ -163,7 +197,7 @@ class notebook:
 
 #main function
 def ask_user():
-    binding={}
+    # binding={}
     main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
@@ -198,7 +232,7 @@ def ask_user():
         ask_notebook_name=input("Enter Notebook:").strip().capitalize()
         if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
             print(f" 📓 Notebook:{ask_notebook_name}")
-            ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\nEnter your choice: ").strip()
+            ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\n[6] Note Manipulation\nEnter your choice: ").strip()
             if ask_about_notebook == "1":
                 add_note(ask_notebook_name)
                 # ask_notebook_name.addnote()
@@ -212,6 +246,8 @@ def ask_user():
             elif ask_about_notebook =="5":
                 filter_note(ask_notebook_name)
                 pass #Filter by tags
+            else:
+                note_manipulation(ask_notebook_name)
         else:
             print("It doesnt exist.")
 

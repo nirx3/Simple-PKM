@@ -28,4 +28,4 @@
 - [x] Notes stored in respective table with same name as that of their category in database.
 - [x] Storing notes in *.md* format
 - [x] Searching notes via keyword (only available within a specific notebook)
-
+- [x] Note deletion
