@@ -17,16 +17,15 @@ class note:
         self.content=content
     def editnote(self):
         print("comming soon")
-    def deletenote(self):
-        print("comming soon")
+    def deletenote(self,notebook_name):
+        delete_note(notebook_name,self.title)
 
 def edit_note():
     print("coming soon..")
 
 
 
-def delete_note(notebook):
-    ask_to_delete=input("Enter ID of the note which you wish to delete: ").strip().capitalize()
+def delete_note(notebook,ask_to_delete):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
         delete_script =f'''
@@ -38,7 +37,9 @@ def delete_note(notebook):
     filepath=f"Notebooks/{notebook}/{ask_to_delete}.md"
     if os.path.exists(filepath):
         os.remove(filepath)
-    print("Note with code {} has been deleted".format(ask_to_delete))
+    print("Note with code {} has been deleted..".format(ask_to_delete))
+    with shelve.open("Object_database/note_object.db") as note_object_delete:
+            del note_object_delete[ask_to_delete]
 
 
 
@@ -47,7 +48,11 @@ def note_manipulation(notebook_name):
     if manipulation_mode == 1:
         edit_note()
     elif manipulation_mode == 2:
-        delete_note(notebook_name)
+        ask_delete_note=input("Enter title of note to be deleted:").strip().capitalize()
+        with shelve.open("Object_database/note_object.db") as note_object_retrieve:
+            target= note_object_retrieve[ask_delete_note]
+        target.deletenote(notebook_name)
+        
 
 
 #add note
@@ -58,6 +63,8 @@ def add_note(notebook_name):
     tags=input("Tag(multiple tags require space in between):").strip()
     content=input("Content: ")
     new_note=note(title,author,date,tags.split(" "),content)
+    with shelve.open("Object_database/note_object.db") as note_db:
+        note_db[f"{new_note.title}"] = new_note
     file_path=f"Notebooks/{notebook_name}/{title}.md"
     with open (file_path, "w+") as fopen_note:
         fopen_note.write(f"# Title: {new_note.title}\n")
@@ -237,18 +244,18 @@ def ask_user():
         if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
             print(f" 📓 Notebook:{ask_notebook_name}")
             ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\n[6] Note Manipulation\nEnter your choice: ").strip()
-            with shelve.open("notebook.db") as object_retrieve:
-                target=object_retrieve[f"{ask_notebook_name}"]
+            with shelve.open("Object_database/notebook_object.db") as object_retrieve:
+                target_=object_retrieve[f"{ask_notebook_name}"]
             if ask_about_notebook == "1":
-                target.addnote()
+                target_.addnote()
             elif ask_about_notebook == "2":
-                target.listnote()
+                target_.listnote()
             elif ask_about_notebook =="3":
-                target.viewnote()
+                target_.viewnote()
             elif ask_about_notebook == "4":
-                target.searchbykeywords()
+                target_.searchbykeywords()
             elif ask_about_notebook =="5":
-                target.filternotes()
+                target_.filternotes()
             else:
                 note_manipulation(ask_notebook_name)
         else:
