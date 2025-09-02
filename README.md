@@ -7,9 +7,9 @@
 
 
 ## A comprehensive guide to terms used 
-- ***Notebook*** is a collection of notes of particular kinds in a structured manner. It can be better understood as a vault which stores certain kinds of objects/things or notes in this case. For instance, there can be a notebook named "Journals" where only journaling notes are stored and managed.
-- ***Note*** can be thought of as an actual information to be stored. In simply, notes contain information/data from which one can derive invalauble insight or it is nothing more than a record.
-- ***Tags*** are extra labels attached to a particular note which simply provide what a reader can expect from the contents of that note. Usually, tags tend to let readers know about the  core themes of the content recorded or the state of the note under consideration.
+- ***Notebook*** is a collection of notes of particular kinds in a structured manner. It can be better understood as a vault which stores certain kinds of objects/things or notes(in this case). For instance, a user can create a notebook named "Journals" where only journaling notes are stored and managed.
+- ***Note*** can be thought of as an actual information to be stored or recorded from which an individual can derive an invalauble insight after analysis of content within it.
+- ***Tags*** are extra labels attached to a particular note which simply provide what a reader can expect from the contents written inside that note. Usually, tags tend to let readers get an idea about the  core themes of the information stored within or the state of the note under consideration.
 
 
 ## Features
@@ -24,8 +24,10 @@
 - [x] Filtering notes via tags
 - [x] Listing notes feature
 - [x] Notebook creation
-- [x] Notes creation and reading(in human-readable format)
+- [x] Note creation,reading and deletion (Editing feature is yet to be added)
 - [x] Notes stored in respective table with same name as that of their category in database.
 - [x] Storing notes in *.md* format
 - [x] Searching notes via keyword (only available within a specific notebook)
-- [x] Note deletion
+
+### Structure of source code
+- This rudimentary version of the program tends to apply OOP complemented with heavy function-based programming.Note and Notebook are the only two classes definied within a program with their own respective methods implementing function within.
