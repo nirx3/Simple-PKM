@@ -16,7 +16,7 @@ class note:
         self.tag=tag
         self.content=content
     def editnote(self):
-        print("comming soon")
+        edit_note()
     def deletenote(self,notebook_name):
         delete_note(notebook_name,self.title)
 
@@ -202,7 +202,7 @@ class notebook:
 
 
 #main function
-def ask_user():
+def main():
     main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
     if main_prompt.strip() == "1":
         notebook_name=input("Enter your notebook name: ").strip().capitalize()
@@ -265,4 +265,5 @@ def ask_user():
         pass
 
 
-ask_user()
+if __name__ == "__main__":
+    main()
