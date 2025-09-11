@@ -74,6 +74,7 @@ def add_note(notebook_name):
         fopen_note.write(f"*{new_note.content}*")
     insert_into_database(new_note.title,new_note.author,new_note.date,new_note.tag,new_note.content,notebook_name)
 
+#Listing
 def list_note(notebook_name):
     with sqlite3.connect("Database/main_database.db") as connection:
         cursor=connection.cursor()
@@ -84,7 +85,7 @@ def list_note(notebook_name):
         output=cursor.fetchall()
     print(tabulate(output,headers=['Code','Title','Author','Date','Tags','Content','Notebook'],tablefmt="grid"))
 
-
+#Viewing
 def view_note(notebook_name):
     header=['Code','Title','Author','Date','Tags','Content','Notebook']
     with sqlite3.connect("Database/main_database.db") as connection:
@@ -107,10 +108,7 @@ def view_note(notebook_name):
     formatted_content =Markdown(content)
     console.print(formatted_content)
             
-
-    
-
-
+#Filtering
 def filter_note(notebook_name):
     filtered_notes=[]
     ask_filter_tag=input("Enter filter tag(Multiple tags require space in between): ").strip().split(" ")
@@ -131,8 +129,7 @@ def filter_note(notebook_name):
     print(tabulate(filtered_notes,headers=header,tablefmt="grid"))
 
 
-
-
+#Keyword searching
 def search_by_keyword(notebook_name):
     header= ['Code','Title','Author','Date','Tags','Content','Notebook']
     searched_data=[]
@@ -152,8 +149,6 @@ def search_by_keyword(notebook_name):
     print(tabulate(searched_data,headers=header,tablefmt="grid"))
 
         
-
-
 #inserting into database
 def insert_into_database(Title,Author,Date,Tags,Content,Notebook_name):
     print("Pushing data into database...")
@@ -203,66 +198,87 @@ class notebook:
 
 #main function
 def main():
-    main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
-    if main_prompt.strip() == "1":
-        notebook_name=input("Enter your notebook name: ").strip().capitalize()
-        new_notebook=notebook(notebook_name,date.today())
-        notebook_path=os.path.join("Notebooks",new_notebook.name)
-        try:
-            if not os.path.isdir(notebook_path):
-                print("Creating notebook...")
-                os.makedirs(notebook_path, exist_ok=True)
-                print("Successfully created!")
+    while True:
+        main_prompt=input("1.Add notebook\n2.Open existing notebook\n3.View Stats\nEnter your option: ")
+        if main_prompt.strip() == "1":
+            notebook_name=input("Enter your notebook name: ").strip().capitalize()
+            new_notebook=notebook(notebook_name,date.today())
+            notebook_path=os.path.join("Notebooks",new_notebook.name)
+            try:
+                if not os.path.isdir(notebook_path):
+                    print("Creating notebook...")
+                    os.makedirs(notebook_path, exist_ok=True)
+                    print("Successfully created!")
+                else:
+                    print(f"Notebook with name '{notebook_name}' already exists!")
+                if  not os.path.isdir("Database") :
+                        os.mkdir("Database")
+                with sqlite3.connect("Database/main_database.db") as connection:
+                    cursor=connection.cursor()
+                    create_table=f'''
+                    CREATE TABLE IF NOT EXISTS {notebook_name}(
+                        Code INTEGER  PRIMARY KEY AUTOINCREMENT,
+                        Title TEXT,
+                        Author TEXT,
+                        Date TEXT,
+                        Tags TEXT,
+                        Content TEXT,
+                        Notebook TEXT
+                    );
+                    '''
+                    cursor.execute(create_table)
+                    connection.commit()
+                if not os.path.isdir("Object_database"):
+                    os.mkdir("Object_database")
+                with shelve.open("Object_database/notebook_object.db") as notebook_db:
+                    notebook_db[f"{notebook_name}"]=new_notebook
+            except Exception as e:
+                print(f"An error occured:{e}")
+            print("{} added....".format(notebook_name))
+            prompt_user=input("Do you want to go back? ").strip().capitalize()
+            if prompt_user in ["Y","Yes","Yeah"]:
+                continue
             else:
-                print(f"Notebook with name '{notebook_name}' already exists!")
-            if  not os.path.isdir("Database") :
-                    os.mkdir("Database")
-            with sqlite3.connect("Database/main_database.db") as connection:
-                cursor=connection.cursor()
-                create_table=f'''
-                CREATE TABLE IF NOT EXISTS {notebook_name}(
-                    Code INTEGER  PRIMARY KEY AUTOINCREMENT,
-                    Title TEXT,
-                    Author TEXT,
-                    Date TEXT,
-                    Tags TEXT,
-                    Content TEXT,
-                    Notebook TEXT
-                );
-                '''
-                cursor.execute(create_table)
-                connection.commit()
-            if not os.path.isdir("Object_database"):
-                os.mkdir("Object_database")
-            with shelve.open("Object_database/notebook_object.db") as notebook_db:
-                notebook_db[f"{notebook_name}"]=new_notebook
-        except Exception as e:
-            print(f"An error occured:{e}")
+                print("We are sorry to let you go")
+                break
 
-    elif main_prompt.strip() == "2":
-        ask_notebook_name=input("Enter Notebook:").strip().capitalize()
-        if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
-            print(f" 📓 Notebook:{ask_notebook_name}")
-            ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\n[6] Note Manipulation\nEnter your choice: ").strip()
-            with shelve.open("Object_database/notebook_object.db") as object_retrieve:
-                target_=object_retrieve[f"{ask_notebook_name}"]
-            if ask_about_notebook == "1":
-                target_.addnote()
-            elif ask_about_notebook == "2":
-                target_.listnote()
-            elif ask_about_notebook =="3":
-                target_.viewnote()
-            elif ask_about_notebook == "4":
-                target_.searchbykeywords()
-            elif ask_about_notebook =="5":
-                target_.filternotes()
+        elif main_prompt.strip() == "2":
+            ask_notebook_name=input("Enter Notebook:").strip().capitalize()
+            if os.path.isdir(os.path.join("Notebooks" , ask_notebook_name)):
+                print(f" 📓 Notebook:{ask_notebook_name}")
+                while True:
+                    ask_about_notebook=input("[1] Add new note\n[2] List notes\n[3] View notes\n[4] Search by keywords\n[5] Filter by tags\n[6] Note Manipulation\nEnter your choice: ").strip()
+                    with shelve.open("Object_database/notebook_object.db") as object_retrieve:
+                        target_=object_retrieve[f"{ask_notebook_name}"]
+                    if ask_about_notebook == "1":
+                        target_.addnote()
+                    elif ask_about_notebook == "2":
+                        target_.listnote()
+                    elif ask_about_notebook =="3":
+                        target_.viewnote()
+                    elif ask_about_notebook == "4":
+                        target_.searchbykeywords()
+                    elif ask_about_notebook =="5":
+                        target_.filternotes()
+                    else:
+                        note_manipulation(ask_notebook_name)
+                    prompt_user=input("Do you want to continue? ").strip().capitalize()
+                    if prompt_user in ["Y","Yes","Yeah"]:
+                        continue
+                    else:
+                        print("We are sorry to let you go...")
+                        break
             else:
-                note_manipulation(ask_notebook_name)
-        else:
-            print("It doesnt exist.")
+                print("{} doesnt exist.".format(ask_notebook_name))
+                prompt_user=input("Do you want to go back? ").strip().capitalize()
+                if prompt_user in ["Y","Yes","Yeah"]:
+                    continue
+                else:
+                    print("We are sorry to let you go!")
+                    break
 
-    elif main_prompt.strip() == "3":
-        pass
+        elif main_prompt.strip() == "3":
+            pass
 
 
 if __name__ == "__main__":
