@@ -268,6 +268,8 @@ def main():
                     else:
                         print("We are sorry to let you go...")
                         break
+                break
+                
             else:
                 print("{} doesnt exist.".format(ask_notebook_name))
                 prompt_user=input("Do you want to go back? ").strip().capitalize()
@@ -278,7 +280,17 @@ def main():
                     break
 
         elif main_prompt.strip() == "3":
-            pass
+            print("coming soon")
+            break
+
+        else:
+            print("Invalid Output...")
+            retry=input("Do you again want to try? ").strip().capitalize()
+            if retry in ["Y","Yes","Yeah","Yup"]:
+                continue
+            else:
+                print("Sorry..You have missed your last chance :(, Good luck next time :)")
+                break
 
 
 if __name__ == "__main__":
