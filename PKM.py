@@ -6,6 +6,8 @@ import sqlite3
 from tabulate import tabulate
 from rich.console import Console
 from rich.markdown import Markdown
+from prompt_toolkit import prompt
+# from prompt_toolkit.key_binding import KeyBindings
 
 
 class note:
@@ -15,14 +17,24 @@ class note:
         self.date= date
         self.tag=tag
         self.content=content
-    def editnote(self):
-        edit_note()
+    def editnote(self,notebook_name):
+        edit_note(notebook_name,self.title)
     def deletenote(self,notebook_name):
         delete_note(notebook_name,self.title)
 
-def edit_note():
-    print("coming soon..")
-
+def edit_note(notebook,to_edit):
+    try:
+        print("\nEditing area:")
+        print("NOTE:'#' and '*' are to be left untouched (it makes file compatible)\nPRESS Esc + Enter to save file and quit terminal simultaneously.")
+        print()
+        with open(f"Notebooks/{notebook}/{to_edit}.md" , "r") as file_read_open:
+            lines=file_read_open.read()
+        content=prompt(default=lines,multiline=True)
+        with open(f"Notebooks/{notebook}/{to_edit}.md" , "w") as file_write_open:
+            file_write_open.write(content)
+        print("File succesfully edited..")
+    except Exception as e:
+        print(f"An error occured..")
 
 
 def delete_note(notebook,ask_to_delete):
@@ -46,7 +58,10 @@ def delete_note(notebook,ask_to_delete):
 def note_manipulation(notebook_name):
     manipulation_mode=int(input("[1] Edit/Update note\n[2] Delete note\n Enter your choice: "))
     if manipulation_mode == 1:
-        edit_note()
+        ask_edit_note=input("Enter title of note to be edited: ").strip().capitalize()
+        with shelve.open('Object_database/note_object.db') as note_object_retrieve:
+            target=note_object_retrieve[ask_edit_note]
+        target.editnote(notebook_name)
     elif manipulation_mode == 2:
         ask_delete_note=input("Enter title of note to be deleted:").strip().capitalize()
         with shelve.open("Object_database/note_object.db") as note_object_retrieve:
@@ -57,6 +72,8 @@ def note_manipulation(notebook_name):
 
 #add note
 def add_note(notebook_name):
+    print("\n")
+    print("Creating note....")
     title=input("Title: ").strip().capitalize()
     author=input("Author: ").strip()
     date=input("Date: ").strip()
@@ -106,7 +123,11 @@ def view_note(notebook_name):
     
     console=Console()
     formatted_content =Markdown(content)
+    console.print("\n")
+    console.print(_notebook_,style="italic magenta")
     console.print(formatted_content)
+    console.print("\n")
+    
             
 #Filtering
 def filter_note(notebook_name):
