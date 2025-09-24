@@ -67,6 +67,8 @@ def note_manipulation(notebook_name):
         with shelve.open("Object_database/note_object.db") as note_object_retrieve:
             target= note_object_retrieve[ask_delete_note]
         target.deletenote(notebook_name)
+    else:
+        print("Invalid input!!!")
         
 
 
@@ -198,6 +200,24 @@ def insert_into_database(Title,Author,Date,Tags,Content,Notebook_name):
     print("Data uploaded....")
 
 
+def view_stats():
+    try:
+        if os.path.isdir("Notebooks/"):
+            no_of_notebook = sum(os.path.isdir(os.path.join("Notebooks", d)) for d in os.listdir("Notebooks"))
+            no_of_notes=0
+            for dirpath,subdirs,files in  os.walk("Notebooks/"):
+                for file_name in files:
+                    if file_name.endswith(".md"):
+                        no_of_notes+=1
+            print(f"Total no of notebooks:{no_of_notebook}\nTotal no of notes:{no_of_notes}")
+
+        else:
+            print("No notebook has been created. Please add a notebook first")
+    except Exception as e :
+        print(e)
+
+
+
 #notebook class
 class notebook:
     def __init__(self,name,date):
@@ -281,8 +301,10 @@ def main():
                         target_.searchbykeywords()
                     elif ask_about_notebook =="5":
                         target_.filternotes()
-                    else:
+                    elif ask_about_notebook == "6":
                         note_manipulation(ask_notebook_name)
+                    else:
+                        print("Invalid input!!!")
                     prompt_user=input("Do you want to continue? ").strip().capitalize()
                     if prompt_user in ["Y","Yes","Yeah"]:
                         continue
@@ -301,8 +323,7 @@ def main():
                     break
 
         elif main_prompt.strip() == "3":
-            print("coming soon")
-            break
+            view_stats()
 
         else:
             print("Invalid Output...")
