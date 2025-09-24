@@ -199,17 +199,21 @@ def insert_into_database(Title,Author,Date,Tags,Content,Notebook_name):
         connection.commit()
     print("Data uploaded....")
 
-
+#view stats
 def view_stats():
     try:
         if os.path.isdir("Notebooks/"):
+            header=('No of notebooks', 'No of notes')
             no_of_notebook = sum(os.path.isdir(os.path.join("Notebooks", d)) for d in os.listdir("Notebooks"))
             no_of_notes=0
             for dirpath,subdirs,files in  os.walk("Notebooks/"):
                 for file_name in files:
                     if file_name.endswith(".md"):
                         no_of_notes+=1
-            print(f"Total no of notebooks:{no_of_notebook}\nTotal no of notes:{no_of_notes}")
+            data=[[str(no_of_notebook), str(no_of_notes)]]
+            print("\nSummary table")
+            print(tabulate(data, headers=header, tablefmt="grid"))
+            print()
 
         else:
             print("No notebook has been created. Please add a notebook first")
