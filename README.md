@@ -30,20 +30,19 @@
 - [x] Searching notes via keyword (only available within a specific notebook)
 
 ### Structure of the project
-- Database/             --> storing notebook and notes
+- Database/             ---> storing notebook and notes
 - Notebooks/            ---> Actual home for all notes and their respective notebook
-- Object_database/
- - note_object.db       ---> storing note as an object
- - notebook_object.db   ---> stroing notebook as an object
+- Object_database/      ---> Home to note_object.db and notebook_object.db
+- note_object.db        ---> storing note as an object
+- notebook_object.db    ---> stroing notebook as an object
 - PKM.py                ---> Actual code
 - requirements.txt      ---> Necessary dependencies and libraries
 - READMe.md             ---> Friendly overview of the project
 
 ### Main code (PKM.py)
 This version of code achieves the above mentioned features mainly via the implementation of both user-defined and pre-defined functions.Though minimal, the program has also been approached with an object oriented paradigm. Furthermore, the use of library modules also complement the functionality of the code.
+
 #### Third Party Modules used
-'''
-    - tabulate
-    - rich
-    - prompt_toolkit
-'''
+- tabulate
+- rich
+- prompt_toolkit
